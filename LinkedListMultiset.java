@@ -119,44 +119,37 @@ public class LinkedListMultiset<T> extends Multiset<T>
             }
 	}
 	
+	
 	public void print(PrintStream out) {
-		Node currNode = mHead;
-        Node prevNode = null;
-        T value = null;
- 
-        
-        String[] a = new String[mLength];
-        value = currNode.getValue();
-        int count = 1;
-        
-        for(int i=0; i < mLength; i++) {       	
-             
-        	
-        	for(int j=0; j < mLength; j++) {    		
-        		     if(a[j].contains(value.toString())) {        			
-        			    value = currNode.getNext().getValue(); 
-        			    count = 0;
-        			    }
+		
+		for(int i=0; i < mLength; i++) { 
+		    Node currNode = mHead;
+            Node prevNode = null;
+            T value = currNode.getValue();
+            String[] a = new String[mLength];
+            int count = 1;
+      
+            for(int j=0; j < mLength; j++) {  
         		
-        		
-        		if(value == currNode.getNext().getValue()) {
+        		 if(Arrays.asList(a).contains(currNode.getValue().toString())) {
+        			  currNode = currNode.getNext();
+       			      value = currNode.getValue();
+        			  continue;        			   
+        			    } 
+        		 
+        		 if(value == currNode.getNext().getValue()) {
         		    count++;
+        		    currNode = currNode.getNext();
         		}
-         		    
-        		if(currNode.getNext() == null) {
-                	currNode = mHead;
-                	a[i] = value.toString();
-                	out.printf(value.toString(), count);
-        	    	break;
-        	    	    }  
+        		 else {
+        			 currNode = currNode.getNext();
+        		 }
 
-        		currNode = currNode.getNext();        	
-        		    }
-        /*	if(a[i].equals(value)) {
-        		break;
-        	}
-*/      	    
-        	    }
+            }
+        	
+            a[i] = value.toString();
+        	out.printf(a[i], count);
+      	}
         
                 	
 
