@@ -1,10 +1,9 @@
 import java.io.PrintStream;
-import java.util.*;
 
 public class SortedLinkedListMultiset<T> extends Multiset<T>
 {
 	/** Reference to head node. */
-    protected Node mHead;
+    protected Node<T> mHead;
 
     /** Length of list. */
     protected int mLength;
@@ -16,140 +15,169 @@ public class SortedLinkedListMultiset<T> extends Multiset<T>
 		// Implement me!
 	} // end of SortedLinkedListMultiset()
 	
+	private int compValue(T val1, T val2) {
+		return val1.toString().compareTo(val2.toString());
+		
+	}
 	
 	public void add(T item) {
-		Node newNode = new Node(item);
-		Node prevNode = null;
-		Node currNode;
-		
+
+		Node<T> newNode = new Node<T>(item);
         // If head is empty, then list is empty and head reference need to be initialised.
-       	
-        	if (mHead == null) {
-        	    currNode = newNode;
-        	    prevNode= null;
-                mHead = currNode;
-                mLength++;
-               }
-  
-        	else if(mHead != null) {
-            	currNode = mHead;
-            	for(int i=0; i < mLength; i++) {
-            		if (((Comparable) newNode.getValue()).compareTo(currNode.getValue()) < 0) {
-            			prevNode = newNode;
-            			mHead = prevNode;
-            			currNode = prevNode.getNext();
-            			mLength++;
-           			}
-            			
+   	
+    	if (mHead == null) {
+            mHead = newNode;
+            mLength++;
+            return;
+        }
 
-            		if (((Comparable) newNode.getValue()).compareTo(currNode.getNext().getValue()) <= 0){
-            			
-            		    currNode.setNext(newNode);
-            		    prevNode = currNode;
-            		    currNode = newNode.getNext(); 
-            		    mLength++;
-
-            		    }
-            		    
-                    currNode = currNode.getNext();
-                    
-                    if(currNode == null) {
-                    	break;
-                    	}
-            }
-
-        	}
+		Node<T> prevNode = null;
+		Node<T> currNode = mHead;
+    	while(currNode != null) {
+    		if(compValue(newNode.getValue(), currNode.getValue())>0) {
+    			prevNode = currNode;
+    			currNode = currNode.getNext();
+    		}
+    		break;	
+    	}
+    	prevNode.setNext(newNode);
+    	newNode.setNext(currNode);
+        
 	}    
 		// Implement me! // end of add()
 	
 	
 	public int search(T item) {
-		Node currNode = mHead;
-		Node prevNode = null;
-		Node newNode = new Node(item);
-		for(int i = 0; i< mLength; i++) {
-		    if(newNode.getValue() == currNode.getValue()) {
-			    return (int) newNode.getValue();
-		    }
-		    else {
-		 	    currNode = currNode.getNext();
-		 	     }
-		}
-		
-		// Implement me!		
-		
-		// default return, please override when you implement this method
-		return 0;
+		if (mHead == null) {
+			return 0;
+        }
+
+		Node<T> currNode = mHead;
+		int count = 0;
+    	while(currNode != null) {
+    		if(compValue(item, currNode.getValue())==0) {
+    			count++;
+    		}
+    		if(compValue(item, currNode.getValue())<0) {
+        		break;	
+    		}
+			currNode = currNode.getNext();
+    	}
+    	return count;
 	} // end of add()
 	
 	
-	public void removeOne(T item) {
-    	if (mLength == 0) {
-    		System.out.println("No item to remove");;
-    	}
-        Node currNode = mHead;
-        Node prevNode = null;
-
-        // check if value is head node
-        if (currNode.getValue() == item) {
-            mHead = currNode.getNext();
-            mLength--;
-            System.out.println(item + " removed");
+	private void remove(T item, boolean all) {
+		if (mHead == null) {
+			return;
         }
+		Node<T> currNode = mHead;
+		Node <T> prevNode = null;
 		
-        prevNode = currNode;
-        currNode = currNode.getNext();
+		
+		while(currNode != null) {
+    		if(compValue(item, currNode.getValue())>0) {
+    			prevNode = currNode;
+    			currNode = currNode.getNext();
+    			
+    		} else if (compValue(item, currNode.getValue())==0) {
+    			if (prevNode == null) {
+    				mHead = currNode.getNext();
+    				currNode.setNext(null);
+    				currNode = mHead;    				
+    			}
+    			else {
+        			prevNode.setNext(currNode.getNext());
+        			currNode.setNext(null);
+        			currNode = currNode.getNext();
+        			mLength--;  
+        			if(!all) break;
+    				
+    			}
 
-        while (currNode != null) {
-            if (currNode.getValue() == item) {
-                prevNode.setNext(currNode.getNext());
-                currNode = null;
-                mLength--;
-                System.out.println(item + " removed");
-            }
-            prevNode = currNode;
-            currNode = currNode.getNext();
-        }
+    			
+    		} else {
+    			
+    			break;
+    		}
+		}
+			
+	}
+
+	
+	public void removeOne(T item) {
+		remove(item, false);
 	} // end of removeOne()
 	
 	
 	public void removeAll(T item) {
 		// Implement me!
+		remove(item, true);
 	} // end of removeAll()
 	
 	
 	public void print(PrintStream out) {
-		// Implement me!
-	} // end of print()
+
+	    Node<T> current = mHead;
+
+	    String[] items = new String[mLength];
+	    int[] counters = new int[mLength];
+	    for(int i=0;i<counters.length;i++) {
+	        counters[i] =0;
+        }
+	    while(current != null) {
+
+            countItem(current.getValue(), items, counters);
+
+	        current = current.getNext();
+        }
+
+        for(int i=0;i<items.length;i++) {
+	        if(items[i]==null || items[i].equals("")) {
+	            out.println(items[i]+" | "+counters[i]);
+            }
+        }
+
+    }
+
+    private void countItem(T value, String[] items, int[] counters) {
+	    int nextSpot = 0;
+	    for(int i=0;i<items.length; i++) {
+	        String itemVal = items[i];
+	        if(itemVal.equals(value.toString())) {
+	            counters[i]++;
+	            return;
+            }else{
+                nextSpot++;
+            }
+        }
+        items[nextSpot] = value.toString();
+	    counters[nextSpot]++;
+    }
+
+ // end of print()
 	
-    private class Node  {
+    private class Node<K>  {
     	   
         /** Stored value of node. */
-        protected T mValue;
+        protected K mValue;
         /** Reference to next node. */
-        protected Node mNext;
+        protected Node<K> mNext;
 
-        public Node(T value) {
+        public Node(K value) {
             mValue = value;
             mNext = null;
         }
 
-        public T getValue() {
+		public K getValue() {
             return mValue;
         }
 
-
-        public Node getNext() {
+        public Node<K> getNext() {
             return mNext;
         }
 
-
-        public void setValue(T value) {
-            mValue = value;
-        }
-
-
-        public void setNext(Node next) {
+        public void setNext(Node<K> next) {
             mNext = next;
         }
     } 
