@@ -1,5 +1,6 @@
 import java.io.PrintStream;
-import java.util.*;
+
+import LinkedListMultiset.Node;
 
 public class LinkedListMultiset<T> extends Multiset<T>
 {
@@ -8,6 +9,7 @@ public class LinkedListMultiset<T> extends Multiset<T>
 
     /** Length of list. */
     protected int mLength;
+    
 
 	public LinkedListMultiset() {
         mHead = null;
@@ -17,145 +19,143 @@ public class LinkedListMultiset<T> extends Multiset<T>
 
 
 	public void add(T item) {
-        long startTime = System.nanoTime();
         Node newNode = new Node(item);
 
         // If head is empty, then list is empty and head reference need to be initialised.
         if (mHead == null) {
             mHead = newNode;
+            mLength++;
+            return;
+        }
+        
+        Node currNode = mHead;
+        Node prevNode = null;
+        while(currNode!=null) {
+        	prevNode = currNode;
+        	currNode = currNode.getNext();
         }
 
-        // otherwise, add node to the head of list.
-        else {
-            newNode.setNext(mHead);
-            mHead = newNode;
-
-        }
-
+        prevNode.setNext(newNode);
         mLength++;
+        prevNode = null;
 
-        long endTime = System.nanoTime();
-        System.out.println("time taken = " + ((double)(endTime - startTime)) / Math.pow(10, 9) + " sec");
-    }
- // end of add()
+    }// end of add()
 
 
 	public int search(T item) {
+		if(mHead==null) {
+			return 0;
+		}
         int count = 0;
         Node currNode = mHead;
-        for (int i = 0; i < mLength; ++i) {
-            if (currNode.getValue() == item) {
-                count++;
-            }
-            currNode = currNode.getNext();
+        while(currNode!=null) {
+        	int compare = item.toString().compareTo(currNode.getValue().toString());
+        	if(compare==0) {
+        		count++;
+        	}
+        	currNode = currNode.getNext();
         }
         return count;
 
 	} // end of search()
 
-
 	public void removeOne(T item) {
-        if (mLength == 0) {
-            System.out.println("No item to remove");;
-        }
-        Node currNode = mHead;
-        Node prevNode = null;
 
-        // check if value is head node
-        if (currNode.getValue() == item) {
-            mHead = currNode.getNext();
-            mLength--;
-            System.out.println(item + " removed");
-        }
-
-        prevNode = currNode;
-        currNode = currNode.getNext();
-
-        while (currNode != null) {
-            if (currNode.getValue() == item) {
-                prevNode.setNext(currNode.getNext());
-                currNode = null;
+		if(mHead==null) {
+			return;
+		}
+		
+		Node currNode = mHead;
+		Node prevNode = null;
+		
+		while (currNode != null) {
+			int compare = item.toString().compareTo(currNode.getValue().toString());
+            if (compare==0) {
+            	if (prevNode == null) {
+    				mHead = currNode.getNext();
+    				currNode.setNext(null);
+    			} else {
+	                prevNode.setNext(currNode.getNext());
+	                currNode.setNext(null);
+    			}
                 mLength--;
-                System.out.println(item + " removed");
+                break;
+            }else {
+				prevNode = currNode;
+				currNode = currNode.getNext();
             }
-            prevNode = currNode;
-            currNode = currNode.getNext();
         }
-		// Implement me!
-	} // end of removeOne()
-
+	}
 
 	public void removeAll(T item) {
-        if (mLength == 0) {
-            System.out.println("No item to remove");;
-        }
-        Node currNode = mHead;
-        Node prevNode = null;
-        int count = 0;
-
-        while(currNode != null) {
-            if (currNode.getValue() == item) {
-                count++;
+		if(mHead==null) {
+			return;
+		}
+		
+		Node currNode = mHead;
+		Node prevNode = null;
+		
+		while (currNode != null) {
+			int compare = item.toString().compareTo(currNode.getValue().toString());
+            if (compare==0) {
+            	if (prevNode == null) {
+    				mHead = currNode.getNext();
+    				currNode.setNext(null);
+    				currNode = mHead;    				
+    			} else {
+	                prevNode.setNext(currNode.getNext());
+	                currNode.setNext(null);
+	                currNode = prevNode.getNext();
+    			}
                 mLength--;
-
-                if (prevNode == null) {
-                    mHead = currNode.getNext();
-                } else {
-                    prevNode.setNext(currNode.getNext());
-                }
-
-                if (currNode.getNext() != mHead) {
-                    prevNode.setValue(currNode.getValue());
-                }
-
-                currNode = currNode.getNext();
-
-
+            }else {
+				prevNode = currNode;
+				currNode = currNode.getNext();
             }
-            System.out.println("Total " + item + " removed: " + count);
         }
 	}
 
 	public void print(PrintStream out) {
-
-	    Node current = mHead;
-
+		if(mHead==null) {
+			return;
+		}
+	    
 	    String[] items = new String[mLength];
 	    int[] counters = new int[mLength];
 	    for(int i=0;i<counters.length;i++) {
-	        counters[i] =0;
-        }
-	    while(current != null) {
+	    	counters[i] = 0;
+	    }
+	    Node current = mHead;
+	    while(current!=null) {
+	    	countItem(current.getValue(), items, counters);
+	    	current = current.getNext();
+	    }
 
-            countItem(current.getValue(), items, counters);
-
-	        current = current.getNext();
-        }
-
-        for(int i=0;i<items.length;i++) {
-	        if(items[i]==null || items[i].equals("")) {
-	            out.println(items[i]+" | "+counters[i]);
-            }
-        }
-
+	    for(int i=0;i<items.length;i++) {
+	    	String item = items[i];
+	    	if(item==null || item.equals("")) {
+	    		continue;
+	    	}
+	    	out.println(item + " | "+counters[i]);
+	    }
     }
 
     private void countItem(T value, String[] items, int[] counters) {
-	    int nextSpot = 0;
-	    for(int i=0;i<items.length; i++) {
-	        String itemVal = items[i];
-	        if(itemVal.equals(value.toString())) {
-	            counters[i]++;
-	            return;
-            }else{
-                nextSpot++;
-            }
-        }
-        items[nextSpot] = value.toString();
-	    counters[nextSpot]++;
-    }
+		for(int i=0;i<items.length;i++) {
+			String item = items[i];
+			if(null==item) {
+				items[i] = value.toString();
+				counters[i]++;
+				break;
+			}
+			if(value.toString().equals(items[i])) {
+				counters[i]++;
+				break;
+			}
+		}
+	}
 
-    /**
+	/**
      * Node type, inner private class.
      */
 
@@ -179,12 +179,6 @@ public class LinkedListMultiset<T> extends Multiset<T>
         public Node getNext() {
             return mNext;
         }
-
-
-        public void setValue(T value) {
-            mValue = value;
-        }
-
 
         public void setNext(Node next) {
             mNext = next;

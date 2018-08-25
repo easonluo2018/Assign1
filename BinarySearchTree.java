@@ -1,6 +1,8 @@
 public class BinarySearchTree<T> {
 
     private BstNode<T> root;
+    
+    private int size;
 
     public void insert(T value) {
         root = insert(root, value);
@@ -13,11 +15,7 @@ public class BinarySearchTree<T> {
      * @return
      */
     public BstNode<T> delete(T value, boolean all) {
-
-        if (root == null) return null;
-
         return delete(root, value, all);
-
     }
 
     /**
@@ -29,32 +27,50 @@ public class BinarySearchTree<T> {
      */
     private BstNode<T> delete(BstNode<T> root, T item, boolean all) {
 
-        BstNode<T> deletingNode = search(root, item);
+        if(root==null) return null;
+        
+        int result = compare(item, root.getValue());
+        if(result<0) root.setLeft(delete(root.getLeft(), item, all));
+        else if (result>0) root.setRight(delete(root.getRight(), item, all));
+        else {
+        	if(root.getCounter()>1) {
+    			root.decrease();
+    			return root;
+    		}
 
-        if (deletingNode == null) {
-            return null;
+        	if(root.getLeft()==null && root.getRight() == null) {
+        		root = null;
+        	} else if(root.getLeft() == null) {
+    			root = root.getRight();
+        	} else if(root.getRight() == null) {
+        		root = root.getLeft();
+        	} else {
+        		BstNode<T> minRight = findMin(root.getRight());
+        		root.setRight(delete(root.getRight(), minRight.getValue(), true));
+        		root.setValue(minRight.getValue());
+        		root.setCounter(minRight.getCounter());
+        	}
         }
-
-        int countChildren = deletingNode.countChildren();
-
-        if(countChildren==0) {
-
-        } else if (countChildren==1) {
-
-        } else {
-
-        }
-        // if root then remove
-
-        return null;
+        return root;
     }
 
 
-    private BstNode<T> insert(BstNode<T> root, T value) {
+    private BstNode<T> findMin(BstNode<T> root) {
+    	BstNode<T> min = root;
+    	while(min.getLeft() != null) {
+    		min = min.getLeft();
+    	}
+		return min;
+	}
 
-        if(null==root) return new BstNode<T>(value);
+	private BstNode<T> insert(BstNode<T> root, T value) {
 
-        int result = compareValue(value, root);
+        if(null==root) {
+        	size++;
+        	return new BstNode<T>(value);
+        }
+
+        int result = compare(value, root.getValue());
         if(result==0) {
             root.increase();
         }else if(result<0) {
@@ -66,7 +82,7 @@ public class BinarySearchTree<T> {
         return root;
     }
 
-    public BstNode search(T value) {
+    public BstNode<T> search(T value) {
         return search(root, value);
     }
 
@@ -74,7 +90,7 @@ public class BinarySearchTree<T> {
 
         if(null==root) return null;
 
-        int result = compareValue(value, root);
+        int result = compare(value, root.getValue());
 
         if(result==0) return root;
 
@@ -85,11 +101,11 @@ public class BinarySearchTree<T> {
         }
     }
 
-    private int compareValue(T value, BstNode<T> node) {
-        String strNewVal = value.toString();
-        String strCurrentNodeVal = node.getValue().toString();
-        return strNewVal.compareTo(strCurrentNodeVal);
+    private int compare(T value1, T value2) {
+        return value1.toString().compareTo(value2.toString());
     }
+    
+    public int size() {return size;}
 
 }
 
