@@ -1,5 +1,6 @@
 import java.io.PrintStream;
-import java.util.*;
+import java.util.Iterator;
+import java.util.Queue;
 
 public class BstMultiset<T> extends Multiset<T>
 {
@@ -40,7 +41,12 @@ public class BstMultiset<T> extends Multiset<T>
 
 	public void print(PrintStream out) {
 		// Implement me!
-		out.print(bst.toString());
+		Queue<BstNode<T>> nodes = bst.traverse(BinarySearchTree.INORDER);
+		Iterator<BstNode<T>> iter = nodes.iterator();
+		while(iter.hasNext()) {
+			BstNode<T> node = iter.next();
+			out.println(node.getValue().toString() + " | " + node.getCounter());
+		}
 	} // end of print()
 
 } // end of class BstMultiset
