@@ -29,6 +29,10 @@ public class MultisetTesterCopy
 
 	protected static final int OPERATIONS = 5000;
 	
+	protected static final boolean REFRESH_OPERATIONS = false;
+	
+	protected static final String OPERATION_FILE = "operation1.in";
+	
 	
 	protected static final String[] OPS = {"A", "S", "RO", "RA"};
 	
@@ -191,12 +195,10 @@ public class MultisetTesterCopy
 
 		generateData(multiset);
 		
-		String operationFile = "operation1.in";
-		
-		generateOperations(operationFile);
+		generateOperations();
 		// construct in and output streams/writers/readers, then process each operation.
 		try {
-			BufferedReader inReader = new BufferedReader(new FileReader(operationFile));
+			BufferedReader inReader = new BufferedReader(new FileReader(OPERATION_FILE));
 			PrintWriter searchOutWriter = new PrintWriter(System.out, true);
 			
 			if (searchOutFilename != null) {
@@ -212,9 +214,12 @@ public class MultisetTesterCopy
 	} // end of main()
 
 
-	private static void generateOperations(String operationFile) {
+	private static void generateOperations() {
+		
+		if(!REFRESH_OPERATIONS) return ;
+		
 		Random random = new Random();
-		try (BufferedWriter writer = new BufferedWriter(new FileWriter(operationFile))) {
+		try (BufferedWriter writer = new BufferedWriter(new FileWriter(OPERATION_FILE))) {
 			
 			Map<String, Integer> ratio = new HashMap<String, Integer>();
 			
