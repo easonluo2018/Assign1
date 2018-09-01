@@ -1,8 +1,15 @@
+import java.util.Queue;
+import java.util.concurrent.LinkedBlockingQueue;
+
 public class BinarySearchTree<T> {
 
     private BstNode<T> root;
     
     private int size;
+    
+    public static final int PREORDER = -1;
+    public static final int INORDER = 0;
+    public static final int POSTORDER = 1;
 
     public void insert(T value) {
         root = insert(root, value);
@@ -15,7 +22,8 @@ public class BinarySearchTree<T> {
      * @return
      */
     public BstNode<T> delete(T value, boolean all) {
-        return delete(root, value, all);
+        root = delete(root, value, all);
+        return root;
     }
 
     /**
@@ -33,7 +41,7 @@ public class BinarySearchTree<T> {
         if(result<0) root.setLeft(delete(root.getLeft(), item, all));
         else if (result>0) root.setRight(delete(root.getRight(), item, all));
         else {
-        	if(root.getCounter()>1) {
+        	if(!all && root.getCounter()>1) {
     			root.decrease();
     			return root;
     		}
@@ -53,9 +61,8 @@ public class BinarySearchTree<T> {
         }
         return root;
     }
-
-
-    private BstNode<T> findMin(BstNode<T> root) {
+    
+	private BstNode<T> findMin(BstNode<T> root) {
     	BstNode<T> min = root;
     	while(min.getLeft() != null) {
     		min = min.getLeft();
@@ -106,6 +113,48 @@ public class BinarySearchTree<T> {
     }
     
     public int size() {return size;}
+
+	public Queue<BstNode<T>> traverse(int order) {
+		Queue<BstNode<T>> nodes = new LinkedBlockingQueue<BstNode<T>>();
+		switch(order) {
+			case PREORDER: {
+				traversePreOrder(root, nodes);
+				break;
+			}
+			case INORDER: {
+				traverseInOrder(root, nodes);
+				break;
+			}
+			case POSTORDER: {
+				traversePostOrder(root, nodes);
+				break;
+			}
+			default: break;
+		}
+		return nodes;
+	}
+
+	private void traverseInOrder(BstNode<T> root, Queue<BstNode<T>> nodes) {
+		if(root==null) return;
+		if(root.getLeft()!=null) traverseInOrder(root.getLeft(), nodes);
+		nodes.add(root);
+		if(root.getRight()!=null) traverseInOrder(root.getRight(), nodes);
+		
+	}
+
+	private void traversePostOrder(BstNode<T> root, Queue<BstNode<T>> nodes) {
+		if(root==null) return;
+		if(root.getLeft()!=null) traverseInOrder(root.getLeft(), nodes);
+		if(root.getRight()!=null) traverseInOrder(root.getRight(), nodes);
+		nodes.add(root);
+	}
+
+	private void traversePreOrder(BstNode<T> root, Queue<BstNode<T>> nodes) {
+		if(root==null) return;
+		nodes.add(root);
+		if(root.getLeft()!=null) traverseInOrder(root.getLeft(), nodes);
+		if(root.getRight()!=null) traverseInOrder(root.getRight(), nodes);
+	}
 
 }
 
